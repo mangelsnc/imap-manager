@@ -1,0 +1,20 @@
+{
+    "name": "mangelsnc/imap-manager",
+    "description": "IMAP Mailboxes Management",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Miguel Ángel Sánchez Chordi",
+            "email": "mangel.snc@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    },
+    "autoload": {
+        "psr-0": {
+            "ImapManager\\": "src/"
+        }
+    }
+}
