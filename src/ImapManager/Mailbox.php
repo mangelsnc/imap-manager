@@ -2,166 +2,62 @@
 
 namespace ImapManager;
 
-use ImapManager\ConnectionFlags;
-use ImapManager\Exception;
-
-class Mailbox
+class MailBox
 {
-    private $server;
-    private $port;
-    private $mailboxName;
-    private $flags;
+    private $name;
+    private $delimiter;
+    private $attributes;
 
-    public function __construct($server, $port = 993, $mailboxName = "INBOX") 
+    public function __construct($mailbox = null)
     {
-        if(is_null($server)){
-            throw new Exception\ServerRequiredException();
+        if($mailbox) {
+            $this->name = imap_utf7_decode($mailbox->name);
+            $this->delimiter = $mailbox->delimiter;
+            $this->attributes = $mailbox->attributes;
         }
-
-        $this->server = $server;
-        $this->port = $port;
-        $this->mailboxName = $mailboxName;
-        $this->flags = array();
     }
 
-    public function getServer()
+    public function setName($name)
     {
-        return $this->server;
+        $this->name = imap_utf7_encode($name);
+
+        return $this;
     }
 
-    public function setServer($server)
+    public function getName()
     {
-        $this->server = $server;
+        return imap_utf7_decode($this->name);
     }
 
-    public function getPort()
+    public function setDelimiter($delimiter)
     {
-        return $this->port;
+        $this->delimiter = $delimiter;
+
+        return $this;
     }
 
-    public function setPort($port)
+    public function getDelimiter()
     {
-        $this->port = $port;
+        return $this->delimiter;
     }
 
-    public function getMailboxName()
+    public function setAttributes($attributes)
     {
-        return $this->mailboxName;
+        $this->attributes = $attributes;
+
+        return $this;
     }
 
-    public function setMailboxName($mailboxName)
+    public function getAttributes()
     {
-        $this->mailboxName = $mailboxName;
+        return $this->attributes;
     }
 
-    public function setService($service = "imap")
+    public static function create($manager, $name)
     {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_SERVICE . $service;
-    }
-
-    public function setUser($user)
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_USER . $user;   
-    }
-
-    public function setAuthUser($authUser)
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_AUTHUSER . $authUser;   
-    }
-
-    public function setAnonymousUser()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_ANONYMOUS;
-    }
-
-    public function setDebug()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_DEBUG;
-    }
-
-    public function setSecure()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_SECURE;   
-    }
-
-    public function setServiceImap()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_IMAP;
-    }
-
-    public function setServiceImap2()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_IMAP2;
-    }
-
-    public function setServiceImap2bis()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_IMAP2BIS;
-    }
-
-    public function setServiceImap4()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_IMAP4;
-    }
-
-    public function setServiceImap4rev1()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_IMAP4REV1;
-    }
-
-    public function setServicePop3()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_POP3;
-    }
-
-    public function setServiceNntp()
-    {
-        $this->flags ['type']= ConnectionFlags::CONNECTION_FLAG_NNTP;
-    }
-
-    public function setNoRsh()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_NNTP;
-    }
-
-    public function setSsl()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_SSL;
-    }
-
-    public function setValidateCert()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_VALIDATE_CERT;
-    }
-
-    public function setNoValidateCert()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_NOVALIDATE_CERT;
-    }
-
-    public function setTls()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_TLS;
-    }
-
-    public function setNoTls()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_NOTLS;
-    }
-
-    public function setReadOnly()
-    {
-        $this->flags []= ConnectionFlags::CONNECTION_FLAG_READONLY;
-    }
-
-    public function getConnectionFlagsString()
-    {
-        return implode($this->flags);
-
-    }
-
-    public function getConnectionString()
-    {
-        return '{'.$this->server.':'.$this->port.$this->getConnectionFlagsString().'}'.$this->mailboxName;
+        $connectionString = substr($manager->getConnectionString(), 0, strrpos($manager->getConnectionString(), '}') + 1);
+        $mailboxName = $connectionString . imap_utf7_encode($name);
+        
+        return imap_createmailbox($manager->getImapStream(), $mailboxName);
     }
 }
