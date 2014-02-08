@@ -1,3 +1,4 @@
 /vendor/
-imap-manager.sublime-project
-imap-manager.sublime-workspace
+/imap-manager.sublime-project
+/imap-manager.sublime-workspace
+/config/config_test.php
