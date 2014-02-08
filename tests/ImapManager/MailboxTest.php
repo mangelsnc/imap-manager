@@ -2,57 +2,38 @@
 
 namespace ImapManager\Tests;
 
-use ImapManager\Mailbox;
+require_once __DIR__ . '/../../config/config_test.php';
+
+use ImapManager\ImapManager;
+use ImapManager\MailBox;
+use ImapManager\ConnectionString;
 use ImapManager\Exception;
 
-class MailboxTest extends \PHPUnit_Framework_TestCase
+class MailBoxTest extends \PHPUnit_Framework_TestCase
 {
+    private $connectionStringMock;
+    private $manager;
+
     public function setUp()
     {
-        $this->mailbox = new Mailbox("imap.gmail.com");
+        $this->connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
+        $this->connectionStringMock->expects($this->any())
+                          ->method('getConnectionString')
+                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}INBOX'));
+
+        $this->manager = new ImapManager($this->connectionStringMock, USER_EMAIL, USER_PASSWORD);
     }
 
-    public function testDefaultConstructorPortShouldBe993()
+    public function testCanCreateANewMailbox()
     {
-        $this->assertEquals(993, $this->mailbox->getPort());
+        $this->assertTrue(
+                MailBox::create($this->manager, 'TestImapManager'), 
+                imap_last_error()
+        );
     }
 
-    public function testDefaultConstructorMailboxNameShouldBeInbox()
+    public function testCanRenameExistentMailbox()
     {
-        $this->assertEquals("INBOX", $this->mailbox->getMailboxName());
+        
     }
-
-    public function testConnectionsFlagsStringShouldBeWellFormed()
-    {
-        $this->mailbox->setSsl();
-        $this->mailbox->setTls();
-        $this->mailbox->setValidateCert();
-
-        $this->assertEquals("/ssl/tls/validate-cert", $this->mailbox->getConnectionFlagsString());
-    }
-
-    public function testConnectionsFlagsServicesShouldOverwriteExistentFlagServices()
-    {
-        $this->mailbox->setServicePop3();
-        $this->assertEquals("/pop3", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceNntp();
-        $this->assertEquals("/nntp", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceImap();
-        $this->assertEquals("/imap", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceImap2();
-        $this->assertEquals("/imap2", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceImap2bis();
-        $this->assertEquals("/imap2bis", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceImap4();
-        $this->assertEquals("/imap4", $this->mailbox->getConnectionFlagsString());
-
-        $this->mailbox->setServiceImap4rev1();
-        $this->assertEquals("/imap4rev1", $this->mailbox->getConnectionFlagsString());
-    }
-
 }
