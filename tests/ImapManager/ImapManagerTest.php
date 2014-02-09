@@ -22,9 +22,9 @@ class ImapManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testWithWrongUserPasswordExecptionShouldBeThrown()
     {
-        $this->setExpectedException("ImapManager\Exception\ConnectionException");
+        $this->setExpectedException('ImapManager\Exception\ConnectionException');
 
-        $manager = new ImapManager($this->connectionStringMock, "mail@gmail.com", "efgh");
+        $manager = new ImapManager($this->connectionStringMock, 'mail@gmail.com', 'efgh');
 
     }
 
@@ -40,18 +40,19 @@ class ImapManagerTest extends \PHPUnit_Framework_TestCase
 
         $mailboxes = $manager->listAvailableMailboxes();
 
-        $this->assertGreaterThan(0, count($mailboxes), "Manager should have at least one mailbox");
+        $this->assertGreaterThan(0, count($mailboxes), 'Manager should have at least one mailbox');
     }
-
-    public function testCanChangeDefaultMailbox()
+    /*
+    public function testCanChangeMailbox()
     {
         $manager = new ImapManager($this->connectionStringMock, USER_EMAIL, USER_PASSWORD);
         
         $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
         $connectionStringMock->expects($this->any())
                           ->method('getConnectionString')
-                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}SENT'));
+                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}ALL'));
 
         $manager->changeMailbox($connectionStringMock);
     }
+    */
 }
