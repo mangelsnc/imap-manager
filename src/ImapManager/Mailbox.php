@@ -2,26 +2,33 @@
 
 namespace ImapManager;
 
+use ImapManager\Exception as MailBoxException;
+
 class MailBox
 {
+    private $imapStream;
     private $name;
-    private $delimiter;
-    private $attributes;
+    private $date;
+    private $driver;
+    private $messages;
+    private $recent;
+    private $unread;
+    private $deleted;
+    private $size;
 
-    public function __construct($mailbox = null)
+    public function __construct($imapStream)
     {
-        if($mailbox) {
-            $this->name = imap_utf7_decode($mailbox->name);
-            $this->delimiter = $mailbox->delimiter;
-            $this->attributes = $mailbox->attributes;
-        }
-    }
+        $data = imap_mailboxmsginfo($imapStream);
 
-    public function setName($name)
-    {
-        $this->name = imap_utf7_encode($name);
-
-        return $this;
+        $this->imapStream = $imapStream;
+        $this->name = $data->Mailbox;
+        $this->date = new \DateTime($data->Date);
+        $this->driver = $data->Driver;
+        $this->messages = $data->Nmsgs;
+        $this->recent = $data->Recent;
+        $this->unread = $data->Unread;
+        $this->deleted = $data->Deleted;
+        $this->size = $data->Size;
     }
 
     public function getName()
@@ -29,28 +36,39 @@ class MailBox
         return imap_utf7_decode($this->name);
     }
 
-    public function setDelimiter($delimiter)
+    public function getDate()
     {
-        $this->delimiter = $delimiter;
-
-        return $this;
+        return $this->date;
     }
 
-    public function getDelimiter()
+    public function getDriver()
     {
-        return $this->delimiter;
+        return $this->driver;
     }
 
-    public function setAttributes($attributes)
+    public function getTotalMessages()
     {
-        $this->attributes = $attributes;
-
-        return $this;
+        return $this->messages;
     }
 
-    public function getAttributes()
+    public function getRecent()
     {
-        return $this->attributes;
+        return $this->recent;
+    }
+
+    public function getUnread()
+    {
+        return $this->unread;
+    }
+
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
+
+    public function getSize()
+    {
+        return $this->size;
     }
 
     public static function create($manager, $name)
@@ -58,6 +76,31 @@ class MailBox
         $connectionString = substr($manager->getConnectionString(), 0, strrpos($manager->getConnectionString(), '}') + 1);
         $mailboxName = $connectionString . imap_utf7_encode($name);
         
-        return imap_createmailbox($manager->getImapStream(), $mailboxName);
+        if(imap_createmailbox($manager->getImapStream(), $mailboxName)) {
+            
+            return true;
+        } else {
+            throw new MailBoxException\MailBoxCreateException(imap_last_error());
+        }
+
+    }
+
+    public static function delete($manager, $name)
+    {
+        $connectionString = substr($manager->getConnectionString(), 0, strrpos($manager->getConnectionString(), '}') + 1);
+        $mailboxName = $connectionString . imap_utf7_encode($name);
+        
+        if(imap_deletemailbox($manager->getImapStream(), $mailboxName)) {
+            
+            return true;
+        } else {
+            throw new MailBoxException\MailBoxDeleteException(imap_last_error());
+        }
+
+    }
+
+    public function rename($name)
+    {
+        return imap_renamemailbox($this->imapStream, $this->getName(), imap_utf7_encode($name));
     }
 }

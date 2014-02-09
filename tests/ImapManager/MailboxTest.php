@@ -27,13 +27,43 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
     public function testCanCreateANewMailbox()
     {
         $this->assertTrue(
-                MailBox::create($this->manager, 'TestImapManager'), 
-                imap_last_error()
+            MailBox::create($this->manager, 'TestImapManager'), 
+            imap_last_error()
+        );
+    }
+
+    public function testCreateDuplicatedMailboxThrowsException()
+    {
+        $this->setExpectedException('ImapManager\Exception\MailBoxCreateException');
+
+        MailBox::create($this->manager, 'TestImapManager');
+    }
+
+    public function testCanDeleteAMailbox()
+    {
+        $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
+        $connectionStringMock->expects($this->any())
+                          ->method('getConnectionString')
+                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}TestImapManager'));
+
+        $manager = new ImapManager($connectionStringMock, USER_EMAIL, USER_PASSWORD);
+
+        $this->assertTrue(
+            MailBox::delete($this->manager, 'TestImapManager')
         );
     }
 
     public function testCanRenameExistentMailbox()
     {
-        
+        $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
+        $connectionStringMock->expects($this->any())
+                          ->method('getConnectionString')
+                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}TestImapManager'));
+
+        $manager = new ImapManager($connectionStringMock, USER_EMAIL, USER_PASSWORD);
+
+        $this->assertTrue(
+            $this->manager->getMailbox()->rename('TestImapManager2')
+        );
     }
 }
