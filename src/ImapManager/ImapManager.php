@@ -11,6 +11,7 @@ class ImapManager
 
     private $imapStream;
     private $connectionString;
+    private $mailbox;
     private $user;
     private $password;
  
@@ -33,22 +34,30 @@ class ImapManager
         return $this->connectionString->getConnectionString();
     }
 
+    public function getMailBox()
+    {
+        return $this->mailbox;
+    }
+
     public function connect()
     {
         $this->imapStream = @imap_open(
-                                    $this->connectionString->getConnectionString(), 
-                                    $this->user, 
-                                    $this->password
+            $this->connectionString->getConnectionString(), 
+            $this->user, 
+            $this->password
         );
 
         if(false === $this->imapStream) {
             throw new Exception\ConnectionException(imap_last_error());          
         }
+
+        $this->mailbox = new MailBox($this->imapStream);
     }
 
     public function changeMailbox($connectionString)
     {
         $this->connectionString = $connectionString;
+        $this->imapStream = null;
         $this->connect();
     }
 
@@ -57,28 +66,6 @@ class ImapManager
         return imap_list($this->imapStream, $this->connectionString->getConnectionString(), '*');
     }
 
-    /*
-    public function getMailBoxes()
-    {
-        $mailboxes = imap_getmailboxes($this->imapStream, $this->connectionString->getConnectionString(), '*');
-
-        if(is_array($mailboxes)) {
-            $mailboxesObj = array();
-            
-            foreach ($mailboxes as $mailbox) {
-                $mailboxObj = new MailBox();
-                $mailboxObj->setName($mailbox->name);
-                $mailboxObj->setDelimiter($mailbox->delimiter);
-                $mailboxObj->setAttributtes($mailbox->attributes);
-
-                $mailboxesObj[]=$mailboxObj;
-            }
-
-            return $mailboxesObj;
-        }
-
-        return false;
-    }
-    */
+    
     
 }
