@@ -54,13 +54,6 @@ class ImapManager
         $this->mailbox = new MailBox($this->imapStream);
     }
 
-    public function changeMailbox($connectionString)
-    {
-        $this->connectionString = $connectionString;
-        $this->imapStream = null;
-        $this->connect();
-    }
-
     public function listAvailableMailboxes()
     {
         return imap_list($this->imapStream, $this->connectionString->getConnectionString(), '*');
