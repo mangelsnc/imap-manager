@@ -13,12 +13,10 @@ class MailBox
     private $messages;
     private $recent;
     private $unread;
-    private $deleted;
-    private $size;
 
     public function __construct($imapStream)
     {
-        $data = imap_mailboxmsginfo($imapStream);
+        $data = imap_check($imapStream);
 
         $this->imapStream = $imapStream;
         $this->name = $data->Mailbox;
@@ -26,9 +24,9 @@ class MailBox
         $this->driver = $data->Driver;
         $this->messages = $data->Nmsgs;
         $this->recent = $data->Recent;
-        $this->unread = $data->Unread;
-        $this->deleted = $data->Deleted;
-        $this->size = $data->Size;
+
+        $info = imap_status($imapStream, $this->name, SA_UNSEEN);
+        $this->unread = $info->unseen;
     }
 
     public function getName()
@@ -61,20 +59,10 @@ class MailBox
         return $this->unread;
     }
 
-    public function getDeleted()
-    {
-        return $this->deleted;
-    }
-
-    public function getSize()
-    {
-        return $this->size;
-    }
-
     public static function create($manager, $name)
     {
-        $connectionString = substr($manager->getConnectionString(), 0, strrpos($manager->getConnectionString(), '}') + 1);
-        $mailboxName = $connectionString . imap_utf7_encode($name);
+        $prefix = self::getMailBoxPrefix($manager->getConnectionString());
+        $mailboxName = $prefix . imap_utf7_encode($name);
         
         if(imap_createmailbox($manager->getImapStream(), $mailboxName)) {
             
@@ -82,13 +70,17 @@ class MailBox
         } else {
             throw new MailBoxException\MailBoxCreateException(imap_last_error());
         }
+    }
 
+    private function getMailBoxPrefix($connectionString)
+    {
+        return substr($connectionString, 0, strrpos($connectionString, '}') + 1);
     }
 
     public static function delete($manager, $name)
     {
-        $connectionString = substr($manager->getConnectionString(), 0, strrpos($manager->getConnectionString(), '}') + 1);
-        $mailboxName = $connectionString . imap_utf7_encode($name);
+        $prefix = self::getMailBoxPrefix($manager->getConnectionString());
+        $mailboxName = $prefix . imap_utf7_encode($name);
         
         if(imap_deletemailbox($manager->getImapStream(), $mailboxName)) {
             
@@ -96,11 +88,13 @@ class MailBox
         } else {
             throw new MailBoxException\MailBoxDeleteException(imap_last_error());
         }
-
     }
 
-    public function rename($name)
+    public function rename($manager, $name)
     {
-        return imap_renamemailbox($this->imapStream, $this->getName(), imap_utf7_encode($name));
+        $prefix = $this->getMailBoxPrefix($manager->getConnectionString());
+        $mailboxName = $prefix . imap_utf7_encode($name);
+
+        return imap_renamemailbox($this->imapStream, $this->getName(), $mailboxName);
     }
 }

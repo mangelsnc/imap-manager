@@ -39,20 +39,6 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
         MailBox::create($this->manager, 'TestImapManager');
     }
 
-    public function testCanDeleteAMailbox()
-    {
-        $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
-        $connectionStringMock->expects($this->any())
-                          ->method('getConnectionString')
-                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}TestImapManager'));
-
-        $manager = new ImapManager($connectionStringMock, USER_EMAIL, USER_PASSWORD);
-
-        $this->assertTrue(
-            MailBox::delete($this->manager, 'TestImapManager')
-        );
-    }
-
     public function testCanRenameExistentMailbox()
     {
         $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
@@ -63,7 +49,29 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
         $manager = new ImapManager($connectionStringMock, USER_EMAIL, USER_PASSWORD);
 
         $this->assertTrue(
-            $this->manager->getMailbox()->rename('TestImapManager2')
+            $manager->getMailbox()->rename($manager, 'TestImapManager2'),
+            imap_last_error()
         );
+    }
+
+    public function testCanDeleteAMailbox()
+    {
+        $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
+        $connectionStringMock->expects($this->any())
+                          ->method('getConnectionString')
+                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}TestImapManager2'));
+
+        $manager = new ImapManager($connectionStringMock, USER_EMAIL, USER_PASSWORD);
+
+        $this->assertTrue(
+            MailBox::delete($manager, 'TestImapManager2')
+        );
+    }
+
+    public function testDeleteAnInexistentMailboxThrowsException()
+    {
+        $this->setExpectedException('ImapManager\Exception\MailBoxDeleteException');
+
+        MailBox::delete($this->manager, 'InexistentMailbox');
     }
 }
