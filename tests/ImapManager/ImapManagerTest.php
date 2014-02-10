@@ -42,17 +42,4 @@ class ImapManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertGreaterThan(0, count($mailboxes), 'Manager should have at least one mailbox');
     }
-    /*
-    public function testCanChangeMailbox()
-    {
-        $manager = new ImapManager($this->connectionStringMock, USER_EMAIL, USER_PASSWORD);
-        
-        $connectionStringMock = $this->getMock('ConnectionString', array('getConnectionString'));
-        $connectionStringMock->expects($this->any())
-                          ->method('getConnectionString')
-                          ->will($this->returnValue('{imap.gmail.com:993/imap/ssl}ALL'));
-
-        $manager->changeMailbox($connectionStringMock);
-    }
-    */
 }
