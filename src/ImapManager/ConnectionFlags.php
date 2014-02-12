@@ -2,6 +2,9 @@
 
 namespace ImapManager;
 
+/**
+ * @codeCoverageIgnore
+ */
 class ConnectionFlags
 {
     const CONNECTION_FLAG_SERVICE = "/service=";

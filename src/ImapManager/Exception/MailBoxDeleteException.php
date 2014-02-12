@@ -2,6 +2,9 @@
 
 namespace ImapManager\Exception;
 
+/**
+ * @codeCoverageIgnore
+ */
 class MailBoxDeleteException extends \Exception
 {
 

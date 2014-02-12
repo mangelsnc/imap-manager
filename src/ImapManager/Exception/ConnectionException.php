@@ -2,6 +2,9 @@
 
 namespace ImapManager\Exception;
 
+/**
+ * @codeCoverageIgnore
+ */
 class ConnectionException extends \Exception
 {
 
