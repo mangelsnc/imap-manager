@@ -97,4 +97,20 @@ class MailBox
 
         return imap_renamemailbox($this->imapStream, $this->getName(), $mailboxName);
     }
+
+    public static function find($manager, $pattern)
+    {
+        $result = imap_listscan(
+            $manager->getImapStream(), 
+            $manager->getConnectionString(),
+            '*',
+            $pattern
+        );
+
+        if(count($result) == 0){
+            return false;
+        }
+
+        return $result;
+    }
 }

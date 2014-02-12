@@ -74,4 +74,25 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
 
         MailBox::delete($this->manager, 'InexistentMailbox');
     }
+
+    public function testSearchMailboxReturnsFalseIfNotMatches()
+    {
+        $this->assertFalse(
+            MailBox::find(
+                $this->manager,
+                'abkcdjf'
+            ),
+            'Return value must be false'
+        );
+    }
+
+    public function testSearchMailboxReturnsArrayIfHaveMatches()
+    {
+        $result = MailBox::find($this->manager, 'INBOX');
+
+        $this->assertTrue(
+            is_array($result),
+            'Return value must be an array'
+        );
+    }
 }
