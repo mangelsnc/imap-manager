@@ -24,6 +24,11 @@ class ImapManager
         $this->connect();
     }
 
+    public function __destruct()
+    {
+        @imap_close($this->imapStream);
+    }
+
     public function getImapStream()
     {
         return $this->imapStream;
