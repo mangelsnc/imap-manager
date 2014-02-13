@@ -13,7 +13,7 @@ class MailBoxDeleteException extends \Exception
 
     public function __construct($message)
     {
-        $this->code = 102;
+        $this->code = 103;
         $this->message  =  $message;
 
         parent::__construct($this->message, $this->code);
