@@ -64,7 +64,7 @@ class MailBox
         $prefix = self::getMailBoxPrefix($manager->getConnectionString());
         $mailboxName = $prefix . imap_utf7_encode($name);
         
-        if(imap_createmailbox($manager->getImapStream(), $mailboxName)) {
+        if(@imap_createmailbox($manager->getImapStream(), $mailboxName)) {
             
             return true;
         } else {
@@ -82,7 +82,7 @@ class MailBox
         $prefix = self::getMailBoxPrefix($manager->getConnectionString());
         $mailboxName = $prefix . imap_utf7_encode($name);
         
-        if(imap_deletemailbox($manager->getImapStream(), $mailboxName)) {
+        if(@imap_deletemailbox($manager->getImapStream(), $mailboxName)) {
             
             return true;
         } else {
@@ -95,19 +95,23 @@ class MailBox
         $prefix = $this->getMailBoxPrefix($manager->getConnectionString());
         $mailboxName = $prefix . imap_utf7_encode($name);
 
-        return imap_renamemailbox($this->imapStream, $this->getName(), $mailboxName);
+        return @imap_renamemailbox($this->imapStream, $this->getName(), $mailboxName);
     }
 
     public static function find($manager, $pattern)
     {
-        $result = imap_listscan(
+        $result = @imap_listscan(
             $manager->getImapStream(), 
             $manager->getConnectionString(),
             '*',
             $pattern
         );
 
-        if(count($result) == 0){
+        if(false === $result) {
+            throw new MailBoxException\ScanNotValidException(imap_last_error());
+        }
+
+        if(count($result) == 0) {
             return false;
         }
 
