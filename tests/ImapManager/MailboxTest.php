@@ -75,7 +75,14 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
         MailBox::delete($this->manager, 'InexistentMailbox');
     }
 
-    public function testSearchMailboxReturnsFalseIfNotMatches()
+    public function testFindMailboxThrowExceptionIfServerDontSupport()
+    {
+        $this->setExpectedException('ImapManager\Exception\ScanNotValidException');
+
+        MailBox::find($this->manager, 'abkcdjf');
+    }
+
+    public function testFindMailboxReturnsFalseIfNotMatches()
     {
         $this->assertFalse(
             MailBox::find(
@@ -86,13 +93,13 @@ class MailBoxTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testSearchMailboxReturnsArrayIfHaveMatches()
+    public function testFindMailboxReturnsArrayIfHaveMatches()
     {
         $result = MailBox::find($this->manager, 'INBOX');
 
         $this->assertTrue(
             is_array($result),
-            'Return value must be an array'
+            'Return value must be an array: ' . imap_last_error()
         );
     }
 }
