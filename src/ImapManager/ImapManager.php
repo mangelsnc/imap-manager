@@ -56,7 +56,7 @@ class ImapManager
 
     public function listAvailableMailboxes()
     {
-        return imap_list($this->imapStream, $this->connectionString->getConnectionString(), '*');
+        return @imap_list($this->imapStream, $this->connectionString->getConnectionString(), '*');
     }
 
     
